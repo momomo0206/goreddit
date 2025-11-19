@@ -5,6 +5,8 @@ go 1.25.3
 require github.com/go-chi/chi v1.5.5
 
 require (
+	github.com/alexedwards/scs/postgresstore v0.0.0-20251002162104-209de6e426de // indirect
+	github.com/alexedwards/scs/v2 v2.9.0 // indirect
 	github.com/cespare/reflex v0.3.1 // indirect
 	github.com/creack/pty v1.1.11 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
