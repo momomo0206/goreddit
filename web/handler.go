@@ -87,8 +87,12 @@ type Handler struct {
 
 func (h *Handler) Home() http.HandlerFunc {
 	type data struct {
+		SessionData
+
 		Posts []goreddit.Post
 	}
+
+	// var once sync.Once
 
 	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/home.html"))
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -98,6 +102,13 @@ func (h *Handler) Home() http.HandlerFunc {
 			return
 		}
 
-		tmpl.Execute(w, data{Posts: pp})
+		// once.Do(func() {
+		// 	h.sessions.Put(r.Context(), "flash", "hello")
+		// })
+
+		tmpl.Execute(w, data{
+			SessionData: GetSessionData(h.sessions, r.Context()),
+			Posts:       pp,
+		})
 	}
 }
