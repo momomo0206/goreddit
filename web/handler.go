@@ -6,10 +6,11 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gorilla/csrf"
 	"github.com/momomo0206/goreddit"
 )
 
-func NewHandler(store goreddit.Store) *Handler {
+func NewHandler(store goreddit.Store, csrfkey []byte) *Handler {
 	h := &Handler{
 		Mux:   chi.NewMux(),
 		store: store,
@@ -20,6 +21,41 @@ func NewHandler(store goreddit.Store) *Handler {
 	comments := CommentHandler{store: store}
 
 	h.Use(middleware.Logger)
+	h.Use(csrf.Protect(
+		csrfkey,
+		csrf.Secure(false),
+		csrf.TrustedOrigins([]string{"localhost:3000"}),
+	))
+
+	// h.Use(csrf.Protect(
+	// 	csrfkey,
+	// 	csrf.Secure(false),
+	// 	csrf.SameSite(csrf.SameSiteLaxMode),
+	// 	csrf.Path("/"),
+	// 	csrf.ErrorHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// 		reason := csrf.FailureReason(r)
+	// 		log.Printf("=== CSRF Verification Failed ===")
+	// 		log.Printf("Reason: %v", reason)
+	// 		log.Printf("Method: %s, URL: %s", r.Method, r.URL.Path)
+	// 		log.Printf("Origin: %s", r.Header.Get("Origin"))
+	// 		log.Printf("Referer: %s", r.Header.Get("Referer"))
+
+	// 		// Cookieの確認
+	// 		cookie, err := r.Cookie("_gorilla_csrf")
+	// 		if err != nil {
+	// 			log.Printf("Cookie Error: %v", err)
+	// 		} else {
+	// 			log.Printf("Cookie Value: %s", cookie.Value)
+	// 		}
+
+	// 		// POSTデータの確認
+	// 		r.ParseForm()
+	// 		log.Printf("Form Token: %s", r.FormValue("gorilla.csrf.Token"))
+	// 		log.Printf("================================")
+
+	// 		http.Error(w, fmt.Sprintf("CSRF verification failed: %v", reason), http.StatusForbidden)
+	// 	})),
+	// ))
 
 	h.Get("/", h.Home())
 	h.Route("/threads", func(r chi.Router) {
